@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "instructions.h"
-CPU_6502 cpu = {0, 0, 0};
+Machine m = {0, 0, 0};
 
 int execute(unsigned char *rom, int programCounter) {
     unsigned char *opcode = &rom[programCounter];
@@ -85,7 +85,7 @@ int execute(unsigned char *rom, int programCounter) {
         case 0x84: printf("STY $%02x", opcode[1]); oplength = 2; break;
         case 0x85: printf("STA $%02x", opcode[1]); oplength = 2; break;
         case 0x86: printf("STX $%02x", opcode[1]); oplength = 2; break;
-        case 0x88: printf("DEY"); dey(&cpu, opcode); break;
+        case 0x88: printf("DEY"); dey(&m, opcode); break;
         case 0x8A: printf("TXA"); break;
         case 0x8C: printf("STY $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
         case 0x8D: printf("STA $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
@@ -105,9 +105,9 @@ int execute(unsigned char *rom, int programCounter) {
         case 0xA4: printf("LDY $%02x", opcode[1]); oplength = 2; break;
         case 0xA5: printf("LDA $%02x", opcode[1]); oplength = 2; break;
         case 0xA6: printf("LDX $%02x", opcode[1]); oplength = 2; break;
-        case 0xA8: printf("TAY"); break;
-        case 0xA9: lda(&cpu, opcode, Immediate);/*printf("LDA #$%02x", opcode[1]);*/ oplength = 2; break;
-        case 0xAA: printf("TAX"); break;
+        case 0xA8: printf("TAY"); tay(*m); break;
+        case 0xA9: lda(&m, opcode, Immediate);/*printf("LDA #$%02x", opcode[1]);*/ oplength = 2; break;
+        case 0xAA: printf("TAX"); tax(*m); break;
         case 0xAC: printf("LTY $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
         case 0xAD: printf("LTA $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
         case 0xAE: printf("LTX $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
@@ -129,7 +129,7 @@ int execute(unsigned char *rom, int programCounter) {
         case 0xC6: printf("DEC $%02x", opcode[1]); oplength = 2; break;
         case 0xC8: printf("INY"); break;
         case 0xC9: printf("CMP #$%02x", opcode[1]); oplength = 2; break;
-        case 0xCA: printf("DEX"); dex(&cpu, opcode); break;
+        case 0xCA: printf("DEX"); dex(&m, opcode); break;
         case 0xCC: printf("CPY $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
         case 0xCD: printf("CMP $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;
         case 0xCE: printf("DEC $%02x%02x", opcode[2], opcode[1]); oplength = 3; break;

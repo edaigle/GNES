@@ -8,14 +8,29 @@
 
 START_TEST(test_lda_immediate_data)
 {
-    CPU_6502 cpu = {0, 0, 0};
+    Machine m = {0, 0, 0};
     unsigned char instruction[3] = {0x9a, 0x05, 0x00};
 
-    lda(&cpu, &instruction[0], Immediate);
+    lda(&m, &instruction[0], Immediate);
 
-    ck_assert_int_eq(cpu.accumulator, 0x05);
-    ck_assert((cpu.status & 0b00000010) == 0);
-    ck_assert((cpu.status & 0b10000000) == 0);
+    ck_assert_int_eq(m.accumulator, 0x05);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0);
+
+    // TODO: add negative case
+}
+END_TEST
+
+START_TEST(test_lda_zeroflag_data)
+{
+    Machine m = {0, 0, 0, 0, 0, {0xDE, 0xEA, 0xDB, 0xEE, 0xF0}};
+    unsigned char instruction[2] = {0x9a, 0x05};
+
+    lda(&m, &instruction[0], Immediate);
+
+    ck_assert_int_eq(m.accumulator, 0x05);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0);
 
     // TODO: add negative case
 }
@@ -23,25 +38,25 @@ END_TEST
 
 START_TEST(test_lda_zero_flag)
 {
-    CPU_6502 cpu = {0, 0, 0};
+    Machine m = {0, 0, 0};
     unsigned char instruction[3] = {0x9a, 0x00, 0x00};
 
-    lda(&cpu, &instruction[0], Immediate);
+    lda(&m, &instruction[0], Immediate);
 
-    ck_assert_int_eq(cpu.accumulator, 0x00);
-    ck_assert_int_eq(cpu.status & 0b00000010, 0b10);
+    ck_assert_int_eq(m.accumulator, 0x00);
+    ck_assert_int_eq(m.status & 0b00000010, 0b10);
 }
 END_TEST
 
 START_TEST(test_dex_pos)
 {
-    CPU_6502 cpu = {0, 2, 0, 0, 0};
+    Machine m = {0, 2, 0, 0, 0};
 
-    dex(&cpu);
+    dex(&m);
 
-    ck_assert_int_eq(cpu.registerX, 0x1);
-    ck_assert((cpu.status & 0b00000010) == 0);
-    ck_assert((cpu.status & 0b10000000) == 0);
+    ck_assert_int_eq(m.registerX, 0x1);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0);
 
     // TODO: add negative case
 }
@@ -49,25 +64,25 @@ END_TEST
 
 START_TEST(test_dex_pos_zero_flag)
 {
-    CPU_6502 cpu = {0, 1, 0, 0, 0};
+    Machine m = {0, 1, 0, 0, 0};
 
-    dex(&cpu);
+    dex(&m);
 
-    ck_assert_int_eq(cpu.registerX, 0);
-    ck_assert((cpu.status & 0b00000010) == 0b10);
-    ck_assert((cpu.status & 0b10000000) == 0);
+    ck_assert_int_eq(m.registerX, 0);
+    ck_assert((m.status & 0b00000010) == 0b10);
+    ck_assert((m.status & 0b10000000) == 0);
 }
 END_TEST
 
 START_TEST(test_dey_pos)
 {
-    CPU_6502 cpu = {0, 0, 2, 0, 0};
+    Machine m = {0, 0, 2, 0, 0};
 
-    dey(&cpu);
+    dey(&m);
 
-    ck_assert_int_eq(cpu.registerY, 0x1);
-    ck_assert((cpu.status & 0b00000010) == 0);
-    ck_assert((cpu.status & 0b10000000) == 0);
+    ck_assert_int_eq(m.registerY, 0x1);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0);
 
     // TODO: add negative case
 }
@@ -75,26 +90,104 @@ END_TEST
 
 START_TEST(test_dey_pos_zero_flag)
 {
-    CPU_6502 cpu = {0, 1, 0, 0, 0};
+    Machine m = {0, 1, 0, 0, 0};
 
-    dex(&cpu);
+    dex(&m);
 
-    ck_assert_int_eq(cpu.registerY, 0);
-    ck_assert((cpu.status & 0b00000010) == 0b10);
-    ck_assert((cpu.status & 0b10000000) == 0);
+    ck_assert_int_eq(m.registerY, 0);
+    ck_assert((m.status & 0b00000010) == 0b10);
+    ck_assert((m.status & 0b10000000) == 0);
+}
+END_TEST
+
+START_TEST(test_tax_pos)
+{
+    Machine m = {2, 0, 0, 0, 0, 0};
+
+    tax(&m);
+
+    ck_assert_int_eq(m.registerX, 0x2);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0);
+
+}
+END_TEST
+
+START_TEST(test_tax_neg)
+{
+    Machine m = {0xff, 0, 0, 0, 0, 0};
+
+    tax(&m);
+
+    ck_assert_int_eq(m.registerX, 0xff);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0b10000000);
+
+}
+END_TEST
+
+START_TEST(test_tax_zero_flag)
+{
+    Machine m = {0, 1, 0, 0, 0, 0};
+
+    tax(&m);
+
+    ck_assert_int_eq(m.registerX, 0);
+    ck_assert((m.status & 0b00000010) == 0b10);
+    ck_assert((m.status & 0b10000000) == 0);
+}
+END_TEST
+
+START_TEST(test_tay_pos)
+{
+    Machine m = {2, 0, 0, 0, 0, 0};
+
+    tay(&m);
+
+    ck_assert_int_eq(m.registerY, 0x2);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0);
+
+}
+END_TEST
+
+START_TEST(test_tay_neg)
+{
+    Machine m = {0xff, 0, 0, 0, 0, 0};
+
+    tay(&m);
+
+    ck_assert_int_eq(m.registerY, 0xff);
+    ck_assert((m.status & 0b00000010) == 0);
+    ck_assert((m.status & 0b10000000) == 0b10000000);
+
+}
+END_TEST
+
+START_TEST(test_tay_zero_flag)
+{
+    Machine m = {0, 0, 2, 0, 0, 0};
+
+    tay(&m);
+
+    ck_assert_int_eq(m.registerY, 0);
+    ck_assert((m.status & 0b00000010) == 0b10);
+    ck_assert((m.status & 0b10000000) == 0);
 }
 END_TEST
 
 Suite *lda_suite(void)
 {
     Suite *s;
-    TCase *tc_lda, *tc_dec;
+    TCase *tc_lda, *tc_dec, *tc_tax;
 
     s = suite_create("Instructions");
     
     tc_lda = tcase_create("LDA");
     tcase_add_test(tc_lda, test_lda_immediate_data);
     tcase_add_test(tc_lda, test_lda_zero_flag);
+
+    suite_add_tcase(s, tc_lda);
 
     tc_dec = tcase_create("DEX+DEY");
     tcase_add_test(tc_dec, test_dex_pos);
@@ -103,6 +196,16 @@ Suite *lda_suite(void)
     tcase_add_test(tc_dec, test_dey_pos_zero_flag);
     
     suite_add_tcase(s, tc_dec);
+
+    tc_tax = tcase_create("TAX+TAY");
+    tcase_add_test(tc_tax, test_tax_pos);
+    tcase_add_test(tc_tax, test_tax_zero_flag);
+    tcase_add_test(tc_tax, test_tax_neg);
+    tcase_add_test(tc_tax, test_tay_pos);
+    tcase_add_test(tc_tax, test_tay_zero_flag);
+    tcase_add_test(tc_tax, test_tay_neg);
+
+    suite_add_tcase(s, tc_tax);
 
     return s;
 }

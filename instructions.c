@@ -1,41 +1,21 @@
 #include "instructions.h"
 
-void dex(CPU_6502 *cpu) {
-    cpu->registerX--;
-
-    if (cpu->registerX == 0) {
-        cpu->status = cpu->status | 0b00000010;
-    } else {
-        cpu->status = cpu->status & 0b11111101;
-    }
-
-    if ((cpu->registerX & 0b10000000) != 0b00000000) {
-        cpu->status = cpu->status | 0b10000000;
-    } else {
-        cpu->status = cpu->status & 0b01111111;
-    }
+void dex(Machine *m) {
+    m->registerX--;
+    updateZeroFlag(m->registerX);
+    updateNegativeFlag(m->registerX);
 }
 
-void dey(CPU_6502 *cpu) {
-    cpu->registerY--;
-
-    if (cpu->registerY == 0) {
-        cpu->status = cpu->status | 0b00000010;
-    } else {
-        cpu->status = cpu->status & 0b11111101;
-    }
-
-    if ((cpu->registerY & 0b10000000) != 0b00000000) {
-        cpu->status = cpu->status | 0b10000000;
-    } else {
-        cpu->status = cpu->status & 0b01111111;
-    }
+void dey(Machine *m) {
+    m->registerY--;
+    updateZeroFlag(m->registerY);
+    updateNegativeFlag(m->registerY);
 }
 
-void lda(CPU_6502 *cpu, unsigned char *instruction, AddressingMode mode) {
+void lda(Machine *m, unsigned char *instruction, AddressingMode mode) {
     switch (mode) {
-        case Immediate: cpu->accumulator = instruction[1]; break;
-        case Absolute: cpu->accumulator = memory[instruction[2]<<4 | instruction[1]];
+        case Immediate: m->accumulator = instruction[1]; break;
+        case Absolute: m->accumulator = m->memory[instruction[2]<<8 | instruction[1]];
         case XIndexedAbsolute: break;
         case YIndexedAbsolute: break;
         case ZeroPage: break;
@@ -43,16 +23,35 @@ void lda(CPU_6502 *cpu, unsigned char *instruction, AddressingMode mode) {
         case XIndexedZeroPageIndirect: break;
         case ZeroPageIndirectYIndexed: break;
     }
+    updateZeroFlag(m->accumulator);
+    updateNegativeFlag(m->accumulator);
+}
 
-    if (cpu->accumulator == 0) {
-        cpu->status = cpu->status | 0b00000010;
+void tax(Machine *m) {
+    m->registerX = m->accumulator;
+    updateZeroFlag(m->registerX);
+    updateNegativeFlag(m->registerX);
+}
+
+void tay(Machine *m) {
+    m->registerY = m->accumulator;
+    updateZeroFlag(m->registerY);
+    updateNegativeFlag(m->registerY);
+}
+
+// TODO: move these to utils?
+void updateZeroFlag(Machine *m, uint8_t result) {
+    if (result == 0) {
+        m->status = m->status | 0b00000010;
     } else {
-        cpu->status = cpu->status & 0b11111101;
+        m->status = m->status & 0b11111101;
     }
+}
 
-    if ((cpu->accumulator & 0b10000000) != 0b00000000) {
-        cpu->status = cpu->status | 0b10000000;
+void updateNegativeFlag(Machine *m, uint8_t result) {
+    if ((result & 0b10000000) != 0b00000000) {
+        m->status = m->status | 0b10000000;
     } else {
-        cpu->status = cpu->status & 0b01111111;
+        m->status = m->status & 0b01111111;
     }
 }

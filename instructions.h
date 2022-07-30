@@ -11,16 +11,20 @@ typedef enum AddressingMode {
     ZeroPageIndirectYIndexed
 } AddressingMode;
 
-typedef struct CPU_6502 {
+typedef struct Machine {
     uint8_t accumulator;
     uint8_t registerX;
     uint8_t registerY;
     uint8_t status;
     uint16_t programCounter;
-} CPU_6502;
+    uint8_t memory[0xFFFF];
+} Machine;
 
-static uint8_t memory[0xFFFF]; //TOFIX: why static?
+void dex(Machine *m);
+void dey(Machine *m);
+void lda(Machine *m, unsigned char *instruction, AddressingMode mode);
+void tax(Machine *m);
+void tay(Machine *m);
 
-void dex(CPU_6502 *cpu);
-void dey(CPU_6502 *cpu);
-void lda(CPU_6502 *cpu, unsigned char *instruction, AddressingMode mode);
+void updateZeroFlag(Machine *m);
+void updateNegativeFlag(Machine *m);
