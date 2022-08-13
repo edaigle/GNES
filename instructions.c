@@ -139,6 +139,13 @@ void sei(Machine *m) {
     m->status = m->status | 0b00000100;
 }
 
+void bcc(Machine *m, unsigned char *instruction) {
+    if (!getCarryFlag(m)) {
+        m->programCounter++;
+        m->programCounter += instruction[1];
+    }
+}
+
 // TODO: move these to utils?
 void updateZeroFlag(Machine *m, uint8_t result) {
     if (result == 0) {
@@ -154,6 +161,10 @@ void updateNegativeFlag(Machine *m, uint8_t result) {
     } else {
         m->status = m->status & 0b01111111;
     }
+}
+
+int getCarryFlag(Machine *m) {
+    return ((m->status & 0b00000001) != 0);
 }
 
 unsigned char fetchData(Machine *m, unsigned char *instruction, AddressingMode mode) {

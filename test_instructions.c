@@ -402,12 +402,25 @@ START_TEST(test_lsr)
     ck_assert_int_eq(m1.status & 0b10000011, 0);
 }
 
+START_TEST(test_bcc)
+{
+    Machine m1 = {0x4, 0, 0, 0, 0x03, {0xDE, 0xEA, 0xDB, 0xEE, 0xF0}, 0xFF};
+    unsigned char instruction1[2] = {0x90, 0x02};
+    bcc(&m1, &instruction1[0]);
+    ck_assert_int_eq(m1.programCounter, 0x06);
+
+    Machine m2 = {0x4, 0, 0, 1, 0x03, {0xDE, 0xEA, 0xDB, 0xEE, 0xF0}, 0xFF};
+    unsigned char instruction2[2] = {0x90, 0x02};
+    bcc(&m2, &instruction2[0]);
+    ck_assert_int_eq(m2.programCounter, 0x03);
+}
+
 // TODO: some missing tests. AND, BIT, EOR, ORA
 
 Suite *instructions(void)
 {
     Suite *s;
-    TCase *tc_load, *tc_store, *tc_dec, *tc_tax, *tc_push_pull, *tc_shift;
+    TCase *tc_load, *tc_store, *tc_dec, *tc_tax, *tc_push_pull, *tc_shift, *tc_branch;
 
     s = suite_create("Instructions");
     
@@ -451,6 +464,10 @@ Suite *instructions(void)
     tcase_add_test(tc_shift, test_asl);
     tcase_add_test(tc_shift, test_lsr);
     suite_add_tcase(s, tc_shift);
+
+    tc_branch = tcase_create("Branch");
+    tcase_add_test(tc_branch, test_bcc);
+    suite_add_tcase(s, tc_branch);
 
     return s;
 }

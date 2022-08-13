@@ -62,5 +62,8 @@ void sei(Machine *m);
 unsigned char fetchData(Machine *m, unsigned char *instruction, AddressingMode mode);
 unsigned char storeData(Machine *m, unsigned char *instruction, unsigned char *reg, AddressingMode mode);
 
+void bcc(Machine *m, unsigned char *instruction);
+
+int getCarryFlag(Machine *m);
 void updateZeroFlag(Machine *m, uint8_t result);
 void updateNegativeFlag(Machine *m, uint8_t result);

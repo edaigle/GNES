@@ -90,7 +90,7 @@ int execute(unsigned char *rom, int programCounter) {
         case 0x8C: store(&m, opcode, m.registerY, Absolute); oplength = 3; break;
         case 0x8D: store(&m, opcode, m.accumulator, Absolute); oplength = 3; break;
         case 0x8E: store(&m, opcode, m.registerX, Absolute); oplength = 3; break;
-        case 0x90: printf("BCC $%02x", opcode[1]); oplength = 2; break;
+        case 0x90: bcc(&m, opcode); oplength = 2; break;
         case 0x91: store(&m, opcode, m.accumulator, ZeroPageIndirectYIndexed); oplength = 2; break;
         case 0x94: store(&m, opcode, m.registerY, XIndexedZeroPage); oplength = 2; break;
         case 0x95: store(&m, opcode, m.accumulator, XIndexedZeroPage); oplength = 2; break;
